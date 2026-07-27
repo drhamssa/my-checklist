@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tuesday meeting checklist</title>
+<style>
+  :root{
+    --ink:#1f2a24;
+    --ink-soft:#5b6660;
+    --line:#dcdfd6;
+    --paper:#faf9f4;
+    --card:#ffffff;
+    --accent:#3c6e52;
+    --accent-soft:#e4efe7;
+    --done:#8b9a90;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding:32px 16px 64px;
+  }
+  .sheet{
+    max-width:640px;
+    margin:0 auto;
+  }
+  header{
+    margin-bottom:24px;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:600;
+    margin:0 0 6px;
+  }
+  h1{
+    font-size:26px;
+    margin:0 0 14px;
+    font-weight:600;
+  }
+  .progress-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .progress-track{
+    flex:1;
+    height:8px;
+    border-radius:99px;
+    background:var(--line);
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:var(--accent);
+    border-radius:99px;
+    transition:width .25s ease;
+  }
+  .progress-label{
+    font-size:13px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    min-width:64px;
+    text-align:right;
+  }
+  .section{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    margin-bottom:14px;
+    overflow:hidden;
+  }
+  .section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 16px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .section-head:hover{background:#fbfbf8;}
+  .section-title-wrap{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .section-num{
+    font-size:12px;
+    color:var(--accent);
+    font-weight:700;
+    background:var(--accent-soft);
+    border-radius:6px;
+    padding:2px 7px;
+  }
+  .section-title{
+    font-size:16px;
+    font-weight:600;
+  }
+  .section-count{
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .chevron{
+    width:16px;height:16px;
+    color:var(--ink-soft);
+    transition:transform .2s ease;
+    flex-shrink:0;
+  }
+  .section.collapsed .chevron{transform:rotate(-90deg);}
+  .items{
+    padding:0 16px 12px;
+  }
+  .section.collapsed .items{display:none;}
+  .item{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:8px 0;
+    border-top:1px solid #f0f0eb;
+  }
+  .item:first-child{border-top:none;}
+  .item input[type="checkbox"]{
+    margin-top:3px;
+    width:17px;
+    height:17px;
+    accent-color:var(--accent);
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  .item label{
+    font-size:14.5px;
+    line-height:1.5;
+    cursor:pointer;
+  }
+  .item.done label{
+    color:var(--done);
+    text-decoration:line-through;
+  }
+  .item .who{
+    display:inline-block;
+    font-size:11.5px;
+    color:var(--accent);
+    background:var(--accent-soft);
+    padding:1px 6px;
+    border-radius:5px;
+    margin-left:6px;
+    text-decoration:none;
+  }
+  .item.done .who{opacity:.6;}
+  footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:20px;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .reset-btn{
+    background:none;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:6px 12px;
+    font-size:13px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .reset-btn:hover{background:#f0f0eb;}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <p class="eyebrow">Meeting agenda</p>
+    <h1>Tuesday meeting checklist</h1>
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">0 / 0 done</div>
+    </div>
+  </header>
+
+  <div id="sections"></div>
+
+  <footer>
+    <span id="savedNote">&nbsp;</span>
+    <button class="reset-btn" id="resetBtn">Reset checklist</button>
+  </footer>
+</div>
+
+<script>
+const DATA = [
+  {
+    title: "Communication & correspondence — email review & management",
+    items: [
+      { text: "Dr Abou Obeida for Hala Ibrahjim" },
+      { text: "Extension for half an hour" },
+      { text: "Film presentation" }
+    ]
+  },
+  {
+    title: "Financial issues",
+    items: [
+      { text: "Finalize the financial material with Mme Huda" }
+    ]
+  },
+  {
+    title: "Student cohorts & curriculum planning",
+    items: [
+      { text: "Refine and organize the timeline/schedule for Year 1 and Year 2 instruction phase; define specific dates, timelines, and guidelines", who: "Dr. Hala" },
+      { text: "Consent forms — finalize and collect all student consent documentation" }
+    ]
+  },
+  {
+    title: "Faculty development program",
+    items: [
+      { text: "Coordinate agenda items and specific activity updates" },
+      { text: "Ola Laurence updates" },
+      { text: "Ensure faculty members submit their required training materials and documentation" },
+      { text: "Announcement strategy" }
+    ]
+  },
+  {
+    title: "Review process and new applicants review",
+    items: [
+      { text: "Review process and new applicants review" }
+    ]
+  },
+  {
+    title: "Advisor feedback checklist",
+    items: [
+      { text: "Advisor feedback checklist for final project report" }
+    ]
+  }
+];
+
+const STORAGE_KEY = "tuesday-meeting-checklist-state";
+let state = {};
+
+function itemId(si, ii){ return "s" + si + "i" + ii; }
+
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY);
+    if(res && res.value){ state = JSON.parse(res.value); }
+  }catch(e){ state = {}; }
+}
+
+async function saveState(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state));
+    const note = document.getElementById("savedNote");
+    note.textContent = "Saved";
+    setTimeout(()=>{ if(note.textContent === "Saved") note.textContent = "\u00A0"; }, 1200);
+  }catch(e){}
+}
+
+function render(){
+  const container = document.getElementById("sections");
+  container.innerHTML = "";
+  let total = 0, doneCount = 0;
+
+  DATA.forEach((section, si) => {
+    const secEl = document.createElement("div");
+    secEl.className = "section";
+
+    const head = document.createElement("div");
+    head.className = "section-head";
+    head.innerHTML = `
+      <div class="section-title-wrap">
+        <span class="section-num">${si+1}</span>
+        <span class="section-title">${section.title}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="section-count" data-count></span>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+    `;
+    head.addEventListener("click", () => {
+      secEl.classList.toggle("collapsed");
+    });
+
+    const itemsEl = document.createElement("div");
+    itemsEl.className = "items";
+
+    let secDone = 0;
+    section.items.forEach((item, ii) => {
+      total++;
+      const id = itemId(si, ii);
+      const checked = !!state[id];
+      if(checked){ doneCount++; secDone++; }
+
+      const row = document.createElement("div");
+      row.className = "item" + (checked ? " done" : "");
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.id = id;
+      cb.checked = checked;
+      cb.addEventListener("change", () => {
+        state[id] = cb.checked;
+        row.classList.toggle("done", cb.checked);
+        saveState();
+        updateProgress();
+        updateSectionCount(secEl, section.items.length);
+      });
+
+      const label = document.createElement("label");
+      label.setAttribute("for", id);
+      label.innerHTML = item.text + (item.who ? `<span class="who">${item.who}</span>` : "");
+
+      row.appendChild(cb);
+      row.appendChild(label);
+      itemsEl.appendChild(row);
+    });
+
+    secEl.appendChild(head);
+    secEl.appendChild(itemsEl);
+    container.appendChild(secEl);
+    updateSectionCount(secEl, section.items.length);
+  });
+
+  updateProgress();
+
+  function updateSectionCount(secEl, itemCount){
+    const rows = secEl.querySelectorAll(".item");
+    let d = 0;
+    rows.forEach(r => { if(r.classList.contains("done")) d++; });
+    secEl.querySelector("[data-count]").textContent = d + " / " + itemCount;
+  }
+}
+
+function updateProgress(){
+  const boxes = document.querySelectorAll('.item input[type="checkbox"]');
+  const total = boxes.length;
+  let done = 0;
+  boxes.forEach(b => { if(b.checked) done++; });
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressLabel").textContent = done + " / " + total + " done";
+}
+
+document.getElementById("resetBtn").addEventListener("click", async () => {
+  state = {};
+  await saveState();
+  render();
+});
+
+(async function init(){
+  await loadState();
+  render();
+})();
+</script>
+</body>
+</html>
